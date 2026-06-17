@@ -1,0 +1,74 @@
+# Copie e execute o código completo aqui no Python
+import matplotlib.pyplot as mpl
+import networkx as nx
+import os
+
+os.makedirs('output', exist_ok=True)
+
+G = nx.Graph()
+vertices = ['A', 'B', 'C', 'D', 'E', 'F']
+G.add_nodes_from(vertices)
+
+arestas = [
+    ('A', 'B', 4), ('A', 'C', 2), ('B', 'C', 1),
+    ('B', 'D', 5), ('C', 'D', 8), ('C', 'E', 10),
+    ('D', 'E', 3), ('D', 'F', 6), ('E', 'F', 2)
+]
+G.add_weighted_edges_from(arestas)
+
+def dijkstra_caminho_minimo(grafo, inicio, fim):
+    distancias = {v: float('inf') for v in grafo.nodes()}
+    distancias[inicio] = 0
+    predecessores = {v: None for v in grafo.nodes()}
+    vertices_nao_processados = set(grafo.nodes())
+    
+    while vertices_nao_processados:
+        vertice_atual = min(vertices_nao_processados, key=lambda v: distancias[v])
+        if vertice_atual == fim or distancias[vertice_atual] == float('inf'):
+            break
+        vertices_nao_processados.remove(vertice_atual)
+        
+        for vizinho in grafo.neighbors(vertice_atual):
+            if vizinho not in vertices_nao_processados:
+                continue
+            peso = grafo[vertice_atual][vizinho]['weight']
+            nova_distancia = distancias[vertice_atual] + peso
+            if nova_distancia < distancias[vizinho]:
+                distancias[vizinho] = nova_distancia
+                predecessores[vizinho] = vertice_atual
+    
+    caminho = []
+    vertice = fim
+    while vertice is not None:
+        caminho.append(vertice)
+        vertice = predecessores[vertice]
+    caminho.reverse()
+    
+    return caminho, distancias[fim]
+
+inicio = 'A'
+fim = 'F'
+caminho, distancia = dijkstra_caminho_minimo(G, inicio, fim)
+
+print(f"Caminho minimo de {inicio} para {fim}: {caminho}")
+print(f"Distancia total: {distancia}")
+
+fig = mpl.figure(figsize=(12, 8))
+pos = nx.spring_layout(G, seed=42, k=1.5)
+
+nx.draw_networkx_edges(G, pos, edge_color='gray', width=1.5, alpha=0.5)
+if len(caminho) > 1:
+    caminho_arestas = [(caminho[i], caminho[i+1]) for i in range(len(caminho)-1)]
+    nx.draw_networkx_edges(G, pos, edgelist=caminho_arestas, edge_color='red', width=3)
+
+nx.draw_networkx_nodes(G, pos, node_color='lightblue', node_size=800, edgecolors='black', linewidths=2)
+nx.draw_networkx_labels(G, pos, font_size=14, font_weight='bold')
+
+edge_labels = {(u, v): str(G[u][v]['weight']) for u, v in G.edges()}
+nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=10)
+
+mpl.title(f"Caminho Minimo com Dijkstra: {inicio} -> {fim} (Distancia: {distancia})", pad=20, fontsize=16, fontweight='bold')
+mpl.tight_layout()
+
+fig.savefig('output/dijkstra_caminho.png', dpi=150, bbox_inches='tight')
+print("Imagem salva em: output/dijkstra_caminho.png")

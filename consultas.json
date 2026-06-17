@@ -1,0 +1,14 @@
+[
+    {
+        "paciente": "j",
+        "medico": "j",
+        "data": "451256",
+        "hora": "1010"
+    },
+    {
+        "paciente": "jose",
+        "medico": "joaquim",
+        "data": "23/04/1968",
+        "hora": "10:10"
+    }
+]
